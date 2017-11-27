@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Calm Explorer</title>
+    
+    <!-- Css Lib -->
+    <link href="lib/css/bootstrap.min.css" rel="stylesheet">
+    <link href="lib/css/font-awesome.min.css" rel="stylesheet">
+    <link href="lib/css/qlobbe.css" rel="stylesheet">
+    
+    <!-- Javascript Lib -->
+    <script type="text/javascript" src="lib/js/jquery-1.12.1.min.js"></script>
+    <script type="text/javascript" src="lib/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="lib/js/underscore-min.js"></script>
+    <script type="text/javascript" src="lib/js/angular.min.js"></script>      
+
+  </head>
+  <!-- body -->
+  <body>
+    <div ng-app="mainApp" ng-controller="searchCtrl">
+        <div class="menu-container row" >
+           
+            <div class="col-md-2">
+                <a class="navbar-brand title" href="#">Calm Explorer</a>
+            </div>            
+            <div class="col-md-10">
+                <form class="navbar-form navbar-left" role="search">                   
+                    <div class="search-input">                      
+                        <div class="form-group text">
+                            <input type="text" ng-model='searchString' class="form-control" placeholder="Search in calm letters">
+                        </div>                    
+                    </div>                    
+                </form>    
+            </div>                      
+        </div>
+        <div class="viz-container container">
+            <!-- resultats -->
+            <div class="col-md-12 result-list">
+                <div ng-repeat="doc in letters | searchFor:searchString">
+                    <div class="doc">
+                        <div class="doc-header">
+                            <ul class="list-inline">
+                                <li class="list-inline-item" style="color:#000">
+                                    <i class="fa fa-clock-o" aria-hidden="true"></i> {{doc["Date d'inscription"].split('T')[0]}} {{doc["Phase"]}} n°{{doc["Ligne"]}}
+                                </li>
+                            </ul>
+                            <ul class="list-inline">
+                                <li class="list-inline-item">
+                                    Né.e.s en {{doc["Annee de naissance"]}} ({{1 * doc["Date d'inscription"].split('-')[0]  - 1 * doc["Annee de naissance"]}} ans)
+                                </li>
+                                <li class="list-inline-item">{{doc["Situation professionnelle / domaine"]}}</li>
+                            </ul> 
+                            <ul class="list-inline">
+                                <li class="list-inline-item">Logement : {{doc["Code Postal"]}}</li>
+                                <li class="list-inline-item">{{doc["Type de couchage"]}}</li>
+                                <li class="list-inline-item">{{doc["Superficie"]}}&#13217</li>
+                            </ul> 
+                            <ul class="list-inline">
+                                <li class="list-inline-item">Possibilités d'accueil : {{doc["Duree d'accueil"]}} (mois)</li>
+                                <li class="list-inline-item">{{doc["Capacite d'accueil"]}} (réfugié.e.s)</li>
+                            </ul>                                                                                                               
+                        </div>
+                        <div class="doc-body">
+                            <h5>Parlez nous de vous :</h5>
+                            <blockquote>
+                                <p>{{doc["Parlez nous de vous"]}}</p>
+                            </blockquote>                            
+                            <h5>Motivations / Pourquoi Calm ?</h5>
+                            <blockquote>
+                                <p>{{doc["Motivations/Pourquoi CALM?"]}}</p>
+                            </blockquote>
+                            <h5>Autres informations :</h5>
+                            <blockquote>
+                                <p>{{doc["Autres informations"]}}</p>
+                            </blockquote>                            
+                        </div>                                                   
+                    </div>
+                    <br>
+                </div>
+            </div>            
+        </div>        
+    </div>
+  </body>
+  <script type="text/javascript">
+
+    var app = angular.module("mainApp", []);
+
+
+    app.filter('searchFor', function(){
+
+        // All filters must return a function. The first parameter
+        // is the data that is to be filtered, and the second is an
+        // argument that may be passed with a colon (searchFor:searchString)
+
+        return function(arr, searchString){
+
+            if(!searchString){
+                return arr;
+            }
+
+            var result = [];
+
+            searchString = searchString.toLowerCase();
+
+            // Using the forEach helper method to loop through the array
+            angular.forEach(arr, function(item){
+
+                if(item.title.toLowerCase().indexOf(searchString) !== -1){
+                    result.push(item);
+                }
+
+            });
+
+            return result;
+        };
+
+    });
+
+
+    app.controller('searchCtrl', ['$scope','$http', function($scope,$http) {
+
+    $http.get('sample.json').then(function onSuccess(response) {
+        console.log(response.data)
+        $scope.letters = response.data;
+    }).catch(function onError(response) {
+        console.log(response);
+    });
+
+   }])    
+
+  </script>
+</html>
